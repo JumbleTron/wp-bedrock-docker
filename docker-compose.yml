@@ -1,0 +1,38 @@
+version: '3.3'
+services:
+  wp:
+    image: bitnami/php-fpm:7.2
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www
+    networks:
+      - wp-network
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    ports:
+      - "80:80"
+    networks:
+      - wp-network
+  db:
+    image: mysql:5.7
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: 'wp'
+      MYSQL_USER: 'wp_user'
+      MYSQL_PASSWORD: 'wp_pass'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '3306:3306'
+    volumes:
+      - wp_db:/var/lib/mysql
+    networks:
+      - wp-network
+volumes:
+  wp_db:
+networks:
+  wp-network:
+    driver: bridge
